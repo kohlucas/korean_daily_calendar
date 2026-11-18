@@ -147,7 +147,8 @@ function renderDay(){
   const LIM=3, shown=expanded?ss:ss.slice(0,LIM);
   let h='<div class="row w">'+esc(w.word)+'</div>';
   const hjs=[...new Set(ss.map(s=>s.hj).filter(Boolean))];
-  const meta=[hjs.length===1?hjs[0]:(hjs.length>1?'동형어 여러 개':w.hanja),(ss[0].pos||'')].filter(Boolean).join(' · ');
+  const pos=(ss.find(s=>s.pos&&s.pos!=='품사 없음')||{}).pos||'';
+  const meta=[hjs.length===1?hjs[0]:(hjs.length>1?'동형어 여러 개':w.hanja),pos].filter(Boolean).join(' · ');
   h+='<div class="row h">'+(meta?esc(meta):'&nbsp;')+'</div>';
   const multiHj=new Set(ss.map(s=>s.hj).filter(Boolean)).size>1;
   shown.forEach((s,i)=>{h+='<div class="row d">'+(ss.length>1?'<span class="n">'+(i+1)+'</span>':'')+(multiHj&&s.hj?'<span class="hj">'+esc(s.hj)+'</span>':'')+esc(s.def)+'</div>'});
