@@ -21,10 +21,10 @@ header button.today[hidden]{visibility:hidden;display:block}
 .view{display:none;flex:1;flex-direction:column}
 .view.on{display:flex}
 /* 일력 면 */
-.top{margin:22px 20px 0;display:flex;align-items:baseline;justify-content:space-between;border-bottom:1.5px solid var(--ink);padding-bottom:12px}
-.top .md{font:900 34px/1.1 "Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang",serif;letter-spacing:-.03em}
-.top .wd{font-size:17px;font-weight:600;color:var(--mute)}
-.big{margin-top:44px;text-align:center;font:900 min(44vw,210px)/.88 Georgia,"Times New Roman",serif;letter-spacing:-.02em;margin:0 0 40px;font-variant-numeric:lining-nums}
+.top{margin:26px 20px 0;display:flex;justify-content:center}
+.top .md{display:none}
+.top .wd{font-size:15px;font-weight:600;color:var(--mute);letter-spacing:.12em}
+.big{text-align:center;font:900 min(11vw,44px)/1.2 "Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang",serif;letter-spacing:-.04em;margin:14px 0 24px}
 .rows{margin:0 20px;border-top:1.5px solid var(--rule)}
 .row{border-bottom:1.5px solid var(--rule);min-height:40px;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px 6px;font-size:16px;line-height:1.45;word-break:keep-all}
 .row.w{font-size:30px;letter-spacing:-.02em;min-height:58px}
@@ -32,7 +32,7 @@ header button.today[hidden]{visibility:hidden;display:block}
 .row.more{font-size:13px;color:var(--mute);font-weight:600;cursor:pointer}
 .row .n{color:var(--mute);margin-right:8px;font-weight:600}
 .row .hj{display:inline-block;font-size:12px;font-weight:600;color:var(--mute);border:1px solid var(--mute);border-radius:3px;padding:0 5px;margin-right:7px;line-height:17px;vertical-align:1px}
-.row.d{font-weight:600}
+.row.d{display:block;font-weight:600;line-height:40px;min-height:0;padding:0 6px;border-bottom:0;background:linear-gradient(to bottom,transparent 38.5px,var(--rule) 38.5px) 0 0/100% 40px repeat-y}
 .foot{display:flex;justify-content:space-between;align-items:flex-start;margin:14px 20px 0;font-size:14px;line-height:1.5}
 .foot a{color:var(--ink);text-decoration:none}
 .foot .r{text-align:right;color:var(--mute);font-weight:600}
@@ -140,8 +140,8 @@ function renderDay(){
   const w=CAL[keyOf(cur)];
   $('title').textContent=cur.getFullYear()+'년 문해력 일력';
   $('md').textContent=MON[cur.getMonth()]+' '+sino(cur.getDate())+'일';
-  $('wd').textContent=WD[cur.getDay()];
-  $('dd').textContent=cur.getDate();
+  $('wd').textContent=WD[cur.getDay()]+' · '+(cur.getMonth()+1)+'. '+cur.getDate()+'.';
+  $('dd').innerHTML=MON[cur.getMonth()]+'<br>'+sino(cur.getDate())+'일';
   $('today').hidden=cur.toDateString()===realToday.toDateString()||!$('v-day').classList.contains('on');
   const ss=visible(w);
   const LIM=3, shown=expanded?ss:ss.slice(0,LIM);
