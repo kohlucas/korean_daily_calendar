@@ -116,6 +116,10 @@ header button.today{white-space:nowrap;flex:none}
 /* 뜻풀이 구절 단위 줄바꿈 */
 .row.d.nice .ck{display:inline-block;max-width:100%}
 .row.d.nice .ck.long{display:inline}
+/* 뜻풀이 왼쪽 정렬 + 번호 내어쓰기 */
+.row.d{display:flex;align-items:flex-start;text-align:left;padding:0 4px}
+.row.d .n{flex:none;width:22px;margin:0;line-height:40px}
+.row.d .tx{flex:1;min-width:0}
 </style>
 </head>
 <body>
@@ -193,7 +197,7 @@ const chunk=(t,pre='')=>String(t).split(/(?<=[,.;:])\s+/).map((x,i)=>'<span clas
 function niceWrap(){document.querySelectorAll('.row.d').forEach(r=>{
   r.classList.remove('nice');r.querySelectorAll('.ck.long').forEach(c=>c.classList.remove('long'));
   const n0=Math.round(r.offsetHeight/40);if(n0<2)return;
-  r.classList.add('nice');const W=r.clientWidth-12;
+  r.classList.add('nice');const W=(r.querySelector('.tx')||r).clientWidth-2;
   r.querySelectorAll('.ck').forEach(c=>{if(c.offsetWidth>=W)c.classList.add('long')});
   if(Math.round(r.offsetHeight/40)>n0)r.classList.remove('nice');
 })}
@@ -214,7 +218,7 @@ function renderDay(){
   const meta=[hjs.length===1?hjs[0]:(hjs.length>1?'동형어 여러 개':w.hanja),pos].filter(Boolean).join(' · ');
   h+='<div class="row h">'+(meta?esc(meta):'&nbsp;')+'</div>';
   const multiHj=new Set(ss.map(s=>s.hj).filter(Boolean)).size>1;
-  shown.forEach((s,i)=>{h+='<div class="row d">'+chunk(s.def,(ss.length>1?'<span class="n">'+(i+1)+'</span>':'')+(multiHj&&s.hj?'<span class="hj">'+esc(s.hj)+'</span>':''))+'</div>'});
+  shown.forEach((s,i)=>{h+='<div class="row d">'+(ss.length>1?'<span class="n">'+(i+1)+'</span>':'')+'<div class="tx">'+chunk(s.def,multiHj&&s.hj?'<span class="hj">'+esc(s.hj)+'</span>':'')+'</div></div>'});
   if(ss.length>LIM) h+='<div class="row more" id="more">'+(expanded?'접기':'뜻 '+(ss.length-LIM)+'개 더 보기')+'</div>';
   const fill=Math.max(0,4-shown.length-(ss.length>LIM?1:0));
   for(let i=0;i<fill;i++) h+='<div class="row">&nbsp;</div>';
