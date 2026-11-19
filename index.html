@@ -121,9 +121,6 @@ header button.today{white-space:nowrap;flex:none}
 .row.d .n{flex:none;width:22px;margin:0;line-height:40px}
 .row.d .tx{flex:1;min-width:0}
 .row.d .hjc{flex:none;line-height:40px}
-/* 동형어(한자)별 묶음 머리 */
-.row.g{justify-content:flex-start;padding:0 4px 0 26px;min-height:40px}
-.row.g .hj{margin:0;font-size:13px;line-height:20px;padding:0 7px;color:var(--ink);border-color:var(--ink)}
 </style>
 </head>
 <body>
@@ -214,31 +211,17 @@ function renderDay(){
   $('wd').textContent=WD[cur.getDay()]+' · '+(cur.getMonth()+1)+'. '+cur.getDate()+'.';
   $('dd').textContent=MON[cur.getMonth()]+' '+sino(cur.getDate())+'일';
   $('today').hidden=cur.toDateString()===realToday.toDateString()||!$('v-day').classList.contains('on');
-  const ss0=visible(w);
-  const multiHj=new Set(ss0.map(s=>s.hj).filter(Boolean)).size>1;
-  // 동형어(한자)가 여럿이면 같은 한자의 뜻끼리 모은다. 한자 없는 뜻이 있으면 맨 앞.
-  let ss=ss0;
-  if(multiHj){const order=[...new Set(['',...ss0.map(s=>s.hj||'')])];ss=order.flatMap(k=>ss0.filter(s=>(s.hj||'')===k))}
-  const LIM=3;let shown=expanded?ss:ss.slice(0,LIM);
-  // 접힌 상태에서는 동형어마다 첫 뜻을 먼저 보여 준다 (한 동형어가 세 칸을 다 차지하지 않게)
-  if(multiHj&&!expanded&&ss.length>LIM){
-    const pick=new Set();const seen=new Set();
-    ss.forEach((s,i)=>{const k=s.hj||'';if(!seen.has(k)&&pick.size<LIM){seen.add(k);pick.add(i)}});
-    ss.forEach((s,i)=>{if(pick.size<LIM)pick.add(i)});
-    shown=ss.filter((s,i)=>pick.has(i));
-  }
+  const ss=visible(w);
+  const LIM=3, shown=expanded?ss:ss.slice(0,LIM);
   let h='<div class="row w">'+esc(w.word)+'</div>';
   const hjs=[...new Set(ss.map(s=>s.hj).filter(Boolean))];
   const pos=(ss.find(s=>s.pos&&s.pos!=='품사 없음')||{}).pos||'';
   const meta=[hjs.length===1?hjs[0]:(hjs.length>1?'동형어 여러 개':w.hanja),pos].filter(Boolean).join(' · ');
   h+='<div class="row h">'+(meta?esc(meta):'&nbsp;')+'</div>';
-  let prev=null,extra=0;
-  shown.forEach((s,i)=>{
-    if(multiHj&&s.hj&&s.hj!==prev){h+='<div class="row g"><span class="hj">'+esc(s.hj)+'</span></div>';extra++}
-    prev=s.hj;
-    h+='<div class="row d">'+(ss.length>1?'<span class="n">'+(i+1)+'</span>':'')+'<div class="tx">'+chunk(s.def)+'</div></div>'});
-  if(ss.length>LIM) h+='<div class="row more" id="more">'+(expanded?'접기':'뜻 '+(ss.length-shown.length)+'개 더 보기')+'</div>';
-  const fill=Math.max(0,4-shown.length-extra-(ss.length>LIM?1:0));
+  const multiHj=new Set(ss.map(s=>s.hj).filter(Boolean)).size>1;
+  shown.forEach((s,i)=>{h+='<div class="row d">'+(ss.length>1?'<span class="n">'+(i+1)+'</span>':'')+(multiHj&&s.hj?'<span class="hjc"><span class="hj">'+esc(s.hj)+'</span></span>':'')+'<div class="tx">'+chunk(s.def)+'</div></div>'});
+  if(ss.length>LIM) h+='<div class="row more" id="more">'+(expanded?'접기':'뜻 '+(ss.length-LIM)+'개 더 보기')+'</div>';
+  const fill=Math.max(0,4-shown.length-(ss.length>LIM?1:0));
   for(let i=0;i<fill;i++) h+='<div class="row">&nbsp;</div>';
   $('rows').innerHTML=h;niceWrap();
   const m=$('more'); if(m) m.onclick=()=>{expanded=!expanded;renderDay()};
