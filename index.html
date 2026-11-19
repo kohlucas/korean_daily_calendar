@@ -34,6 +34,9 @@ header button.today[hidden]{visibility:hidden;display:block}
 .row .hj{display:inline-block;font-size:12px;font-weight:600;color:var(--mute);border:1px solid var(--mute);border-radius:3px;padding:0 5px;margin-right:7px;line-height:17px;vertical-align:1px}
 .row.d{display:block;font-weight:600;line-height:40px;min-height:0;padding:0 6px;border-bottom:0;background:linear-gradient(to bottom,transparent 38.5px,var(--rule) 38.5px) 0 0/100% 40px repeat-y}
 .foot{display:flex;justify-content:space-between;align-items:flex-start;margin:14px 20px 0;font-size:14px;line-height:1.5}
+#dict{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 16px 0;padding:8px 14px;min-height:52px;border:1.5px solid var(--ink);border-radius:4px;color:var(--ink);text-decoration:none;font-size:15px;font-weight:700;line-height:1.35;box-shadow:3px 3px 0 var(--ink);word-break:keep-all}
+#dict .t{flex:1}#dict u{text-underline-offset:3px}#dict svg{flex:none}
+#dict:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
 .foot a{color:var(--ink);text-decoration:none}
 .foot .r{text-align:right;color:var(--mute);font-weight:600}
 .spacer{flex:1;min-height:12px}
@@ -174,7 +177,12 @@ function renderDay(){
   $('rows').innerHTML=h;
   const m=$('more'); if(m) m.onclick=()=>{expanded=!expanded;renderDay()};
   const srcName=[...new Set(w.senses.map(s=>s.src).filter(Boolean))].join(' · ')||'출처 확인 중';
-  $('src').innerHTML=esc(srcName)+(w.link?'<br><a href="'+esc(w.link)+'" target="_blank" rel="noopener">국립국어원 사전 ↗</a>':'');
+  const DN={'기초사전':'한국어기초사전'};
+  const dictName=(srcName.split(' · ').map(x=>DN[x]||x))[0]||'';
+  $('src').textContent=srcName.split(' · ').map(x=>DN[x]||x).join(' · ');
+  let b=document.getElementById('dict');
+  if(!b){b=document.createElement('a');b.id='dict';b.target='_blank';b.rel='noopener';$('rows').parentNode.appendChild(b)}
+  if(w.link&&dictName){b.href=w.link;b.style.display='';b.innerHTML='<span class="t"><u>'+esc(dictName)+'</u>에서<br>더 자세한 뜻과 예문 보기</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>'}else{b.style.display='none'}
   $('no').textContent=w.id+'번째 낱말';
   $('like').classList.toggle('on',likes.includes(w.id));
 }
