@@ -128,7 +128,7 @@ header button.today{white-space:nowrap;flex:none}
   <div class="top"><div class="md" id="md"></div><div class="wd" id="wd"></div></div>
   <div class="big" id="dd"></div>
   <div class="rows" id="rows"></div>
-  <div class="foot"><div class="l" id="src"></div><div class="r" id="no"></div></div>
+  <div class="foot"><div class="l" id="src"></div></div>
   </div>
   <div class="spacer"></div>
   <nav class="bar">
@@ -213,7 +213,6 @@ function renderDay(){
   let b=document.getElementById('dict');
   if(!b){b=document.createElement('a');b.id='dict';b.target='_blank';b.rel='noopener';$('rows').parentNode.appendChild(b)}
   if(w.link&&dictName){b.href=w.link;b.style.display='';b.innerHTML='<span class="t"><u>'+esc(dictName)+'</u>에서<br>더 자세한 뜻과 예문 보기</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>'}else{b.style.display='none'}
-  $('no').textContent=w.id+'번째 낱말';
   $('like').classList.toggle('on',likes.includes(w.id));
 }
 function go(n){cur.setDate(cur.getDate()+n);expanded=false;renderDay()}
