@@ -113,6 +113,9 @@ header button.today{white-space:nowrap;flex:none}
 .rows{border-top-width:1px}
 .row{border-bottom-width:1px}
 .row.d{background:linear-gradient(to bottom,transparent 39px,var(--rule) 39px) 0 0/100% 40px repeat-y}
+/* 뜻풀이 구절 단위 줄바꿈 */
+.row.d.nice .ck{display:inline-block;max-width:100%}
+.row.d.nice .ck.long{display:inline}
 </style>
 </head>
 <body>
@@ -184,6 +187,17 @@ const visible=w=>{if(hjSet(w).size>1)return w.senses;const a=w.senses.filter(s=>
 
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1500)}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+// 뜻풀이 줄바꿈: 쉼표·마침표 뒤에서 끊기도록 구절 단위로 묶는다 (구절 안에서는 되도록 끊지 않음)
+const chunk=(t,pre='')=>String(t).split(/(?<=[,.;:])\s+/).map((x,i)=>'<span class="ck">'+(i?'':pre)+esc(x)+'</span>').join(' ');
+// 구절 단위로 묶었을 때 줄 수가 늘지 않을 때만 적용한다. 한 줄보다 긴 구절은 묶지 않는다.
+function niceWrap(){document.querySelectorAll('.row.d').forEach(r=>{
+  r.classList.remove('nice');r.querySelectorAll('.ck.long').forEach(c=>c.classList.remove('long'));
+  const n0=Math.round(r.offsetHeight/40);if(n0<2)return;
+  r.classList.add('nice');const W=r.clientWidth-12;
+  r.querySelectorAll('.ck').forEach(c=>{if(c.offsetWidth>=W)c.classList.add('long')});
+  if(Math.round(r.offsetHeight/40)>n0)r.classList.remove('nice');
+})}
+addEventListener('resize',()=>{clearTimeout(niceWrap.t);niceWrap.t=setTimeout(niceWrap,100)});
 
 function renderDay(){
   const w=CAL[keyOf(cur)];
@@ -200,11 +214,11 @@ function renderDay(){
   const meta=[hjs.length===1?hjs[0]:(hjs.length>1?'동형어 여러 개':w.hanja),pos].filter(Boolean).join(' · ');
   h+='<div class="row h">'+(meta?esc(meta):'&nbsp;')+'</div>';
   const multiHj=new Set(ss.map(s=>s.hj).filter(Boolean)).size>1;
-  shown.forEach((s,i)=>{h+='<div class="row d">'+(ss.length>1?'<span class="n">'+(i+1)+'</span>':'')+(multiHj&&s.hj?'<span class="hj">'+esc(s.hj)+'</span>':'')+esc(s.def)+'</div>'});
+  shown.forEach((s,i)=>{h+='<div class="row d">'+chunk(s.def,(ss.length>1?'<span class="n">'+(i+1)+'</span>':'')+(multiHj&&s.hj?'<span class="hj">'+esc(s.hj)+'</span>':''))+'</div>'});
   if(ss.length>LIM) h+='<div class="row more" id="more">'+(expanded?'접기':'뜻 '+(ss.length-LIM)+'개 더 보기')+'</div>';
   const fill=Math.max(0,4-shown.length-(ss.length>LIM?1:0));
   for(let i=0;i<fill;i++) h+='<div class="row">&nbsp;</div>';
-  $('rows').innerHTML=h;
+  $('rows').innerHTML=h;niceWrap();
   const m=$('more'); if(m) m.onclick=()=>{expanded=!expanded;renderDay()};
   const srcName=[...new Set(w.senses.map(s=>s.src).filter(Boolean))].join(' · ')||'출처 확인 중';
   const DN={'기초사전':'한국어기초사전'};
