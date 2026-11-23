@@ -107,8 +107,8 @@ header button.dots#cal-btn svg{width:22px;height:22px}
 header .t{min-width:0;white-space:nowrap}
 header button.today{white-space:nowrap;flex:none}
 @media (max-width:360px){header{padding:14px 10px 0 14px}header .t{font-size:15px;gap:6px}header img{height:22px}header button.dots{width:34px}.hr{gap:2px}header button.today{padding:4px 10px}}
-/* 날짜 한 줄 */
-.big{font-size:min(8.2vw,32px);white-space:nowrap;margin:12px 0 20px}
+/* 날짜 두 줄 (시안 A) */
+.big{font-size:min(9.8vw,38px);line-height:1.18;white-space:normal;margin:12px 0 20px}
 /* 줄 두께 통일: 일력 줄은 모두 1px */
 .rows{border-top-width:1px}
 .row{border-bottom-width:1px}
@@ -229,8 +229,8 @@ function renderDay(){
   const w=CAL[keyOf(cur)];
   $('title').textContent=cur.getFullYear()+'년 문해력 일력';
   $('md').textContent=MON[cur.getMonth()]+' '+sino(cur.getDate())+'일';
-  $('wd').textContent=WD[cur.getDay()]+' · '+(cur.getMonth()+1)+'. '+cur.getDate()+'.';
-  $('dd').textContent=MON[cur.getMonth()]+' '+sino(cur.getDate())+'일';
+  $('wd').textContent=WD[cur.getDay()];
+  $('dd').innerHTML=MON[cur.getMonth()]+'<br>'+sino(cur.getDate())+'일';
   $('today').hidden=cur.toDateString()===realToday.toDateString()||!$('v-day').classList.contains('on');
   const ss=visible(w);
   const LIM=3, shown=expanded?ss:ss.slice(0,LIM);
