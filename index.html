@@ -137,6 +137,13 @@ header button.today{white-space:nowrap;flex:none}
 .al-r i{font-style:normal;color:var(--red);font-size:14px}
 .al-r em+i{margin-left:6px}.al-r b+i{margin-left:auto}
 .al-r.cur{background:#ece8de}
+/* 연속 기록 팝업 */
+#st-back{align-items:center;padding-top:0}
+.st{text-align:center;padding:26px 22px 18px}
+.st-n{font:900 44px/1 "Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang",serif;letter-spacing:-.03em}
+.st-t{font-size:19px;font-weight:800;margin-top:14px}
+.st-p{font-size:14px;line-height:1.6;color:var(--mute);margin:10px 0 18px;word-break:keep-all}
+.st button{font:inherit;font-size:15px;font-weight:700;width:100%;padding:11px;background:var(--ink);color:#fff;border:0;border-radius:4px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -186,6 +193,7 @@ header button.today{white-space:nowrap;flex:none}
 </section>
 </div>
 <div class="toast" id="toast"></div>
+<div class="cal-back" id="st-back" hidden><div class="cal st" role="dialog" aria-label="연속 기록"><div class="st-n" id="st-n"></div><div class="st-t" id="st-t"></div><p class="st-p" id="st-p"></p><button id="st-ok">좋아요</button></div></div>
 <div class="cal-back" id="cal-back" hidden><div class="cal" id="cal" role="dialog" aria-label="날짜 이동"><div class="cal-h"><button id="cal-prev" aria-label="이전 달"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><b id="cal-title"></b><button id="cal-next" aria-label="다음 달"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button></div><div class="cal-g" id="cal-g"></div><div class="cal-f"><button id="cal-today">오늘로</button><button id="cal-all">전체 목록</button><button id="cal-close">닫기</button></div></div></div>
 
 <script>
@@ -334,6 +342,7 @@ $('cal-g').onclick=e=>{const b=e.target.closest('[data-d]');if(!b)return;cur=new
 document.addEventListener('keydown',e=>{
   if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)return;
   const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
+  if(!$('st-back').hidden){if(e.key==='Escape'||e.key==='Enter'){stClose();e.preventDefault()}return}
   if(calIsOpen()){
     if(e.key==='Escape'){calClose();e.preventDefault()}
     else if(e.key==='ArrowLeft'){calShift(-1);e.preventDefault()}
@@ -344,7 +353,31 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft'){go(-1);e.preventDefault()}
   else if(e.key==='ArrowRight'){go(1);e.preventDefault()}
 });
+
+// ── 연속 기록: 하루 처음 열 때 한 번 팝업 (기기 안에만 저장) ──
+const NATIVE=['','하루','이틀','사흘','나흘','닷새','엿새','이레','여드레','아흐레','열흘','열하루','열이틀','열사흘','열나흘','보름','열엿새','열이레','열여드레','열아흐레','스무날'];
+const dayWord=n=>n<=20?NATIVE[n]:(n<30?'스무'+NATIVE[n-20]:(n===30?'한 달':n+'일'));
+const PRAISE=['꾸준함이 제일 어려운 건데, 해내고 있어요!','오늘도 잊지 않고 와 주었네요. 멋져요!','하루 한 낱말, 차곡차곡 쌓이고 있어요.','이 정도면 습관이라고 불러도 되겠어요!','어제의 나보다 낱말 하나 더 아는 오늘이에요.'];
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function streakCheck(){
+  let st=null;try{st=JSON.parse(localStorage.getItem('ilryeok.streak.v1'))}catch(e){}
+  const today=ymd(new Date());const y=new Date();y.setDate(y.getDate()-1);
+  if(st&&st.last===today)return;
+  let n,kind;
+  if(!st||!st.last){n=1;kind='first'}
+  else if(st.last===ymd(y)){n=(st.n||1)+1;kind='keep'}
+  else{n=1;kind='again'}
+  try{localStorage.setItem('ilryeok.streak.v1',JSON.stringify({last:today,n:n,best:Math.max(n,(st&&st.best)||0,(st&&st.n)||0)}))}catch(e){}
+  if(kind==='first'){$('st-n').textContent='첫 방문!';$('st-t').textContent='오늘의 낱말을 펼쳤어요';$('st-p').textContent='내일도 낱말을 확인하면 연속 접속 기록이 쌓여요.'}
+  else if(kind==='again'){$('st-n').textContent='다시 첫날';$('st-t').textContent='돌아온 걸 환영해요!';$('st-p').textContent='오늘부터 다시 하루씩 쌓아 봐요. 내일도 만나요.'}
+  else{$('st-n').textContent=dayWord(n)+'째';$('st-t').textContent='연속 '+dayWord(n)+'째 펼쳤어요!';
+    $('st-p').textContent=n===7?'일주일 내내 왔네요! 정말 대단해요.':n===15?'보름 동안 하루도 안 빠졌어요!':n===30?'한 달 내내 함께했어요. 최고예요!':PRAISE[n%PRAISE.length]}
+  $('st-back').hidden=false;$('st-ok').focus();
+}
+const stClose=()=>{$('st-back').hidden=true};
+$('st-ok').onclick=stClose;$('st-back').onclick=e=>{if(e.target===$('st-back'))stClose()};
 renderDay();
+streakCheck();
 </script>
 </body>
 </html>
